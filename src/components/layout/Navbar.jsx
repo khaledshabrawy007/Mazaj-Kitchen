@@ -4,6 +4,7 @@ import { getInitial } from '../../utils/helpers';
 
 function Navbar({ lang, setLang, page, setPage, currentUser, onLogout, itemCount, onCartOpen }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const isAdmin = currentUser?.role === 'admin';
   const navLinks = [
     { key: 'menu', label: lang.menu },
@@ -43,19 +44,49 @@ function Navbar({ lang, setLang, page, setPage, currentUser, onLogout, itemCount
               </button>
             )}
             {currentUser ? (
-              <div className="relative group">
-                <button className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm"
-                  style={{ background: '#E8572A', color: 'white' }}>{getInitial(currentUser.name)}</button>
-                <div className="absolute right-0 top-full pt-2 w-64 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all"
-                  style={{ zIndex: 50 }}>
-                  <div className="rounded-xl shadow-xl overflow-hidden" style={{ background: 'white', border: '1px solid #E5E7EB' }}>
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="font-semibold text-sm">{currentUser.name}</p>
-                      <p className="text-xs text-gray-500 break-all">{currentUser.email}</p>
+              <div className="relative">
+                {/* Avatar button — toggles dropdown on click/tap */}
+                <button
+                  onClick={() => setProfileOpen(v => !v)}
+                  className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm"
+                  style={{ background: '#E8572A', color: 'white' }}
+                >
+                  {getInitial(currentUser.name)}
+                </button>
+
+                {/* Click-away backdrop */}
+                {profileOpen && (
+                  <div
+                    className="fixed inset-0"
+                    style={{ zIndex: 40 }}
+                    onClick={() => setProfileOpen(false)}
+                  />
+                )}
+
+                {/* Dropdown panel */}
+                {profileOpen && (
+                  <div
+                    className={`absolute top-full mt-2 w-56 ${isAdmin ? 'min-w-[220px]' : ''}`}
+                    style={{
+                      zIndex: 50,
+                      [lang.code === 'ar' ? 'left' : 'right']: 0,
+                    }}
+                  >
+                    <div className="rounded-xl shadow-xl overflow-hidden" style={{ background: 'white', border: '1px solid #E5E7EB' }}>
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <p className="font-semibold text-sm text-gray-900">{currentUser.name}</p>
+                        <p className="text-xs text-gray-500 break-all mt-0.5">{currentUser.email}</p>
+                      </div>
+                      <button
+                        onClick={() => { onLogout(); setProfileOpen(false); }}
+                        className="w-full px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors"
+                        style={{ textAlign: lang.code === 'ar' ? 'right' : 'left' }}
+                      >
+                        {lang.logout}
+                      </button>
                     </div>
-                    <button onClick={onLogout} className="w-full px-4 py-2.5 text-left text-sm hover:bg-red-50 text-red-600 font-semibold">{lang.logout}</button>
                   </div>
-                </div>
+                )}
               </div>
             ) : (
               <button onClick={() => setPage('login')} className="hidden sm:block px-4 py-1.5 rounded-lg text-sm font-semibold"
